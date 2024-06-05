@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bookshelf App</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/daisyui@4.11.1/dist/full.min.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  </head>
+  <body class="bg-gray-100 p-4">
+    <h1 class="text-4xl font-bold text-center mb-6">Bookshelf App</h1>
+
+    <form id="book-form">
+      <div
+        class="flex md:flex-row sm:flex-col items-center justify-center mb-6 gap-2"
+      >
+        <input
+          type="text"
+          id="title"
+          class="input input-bordered input-accent w-full max-w-xs"
+          placeholder="Judul Buku"
+          required
+        />
+        <input
+          type="text"
+          id="author"
+          class="input input-bordered input-accent w-full max-w-xs"
+          placeholder="Penulis"
+          required
+        />
+        <input
+          type="number"
+          id="year"
+          class="input input-bordered input-accent w-full max-w-xs"
+          placeholder="Tahun Terbit"
+          required
+        />
+      </div>
+      <div class="flex flex-col gap-2 w-full items-center justify-center">
+        <div class="form-control">
+          <label class="cursor-pointer label">
+            <span class="label-text">Selesai dibaca ?</span>
+            <input
+              id="is-finish"
+              type="checkbox"
+              class="checkbox checkbox-accent ml-2"
+            />
+          </label>
+        </div>
+        <button type="submit" class="btn btn-outline btn-accent btn-wide">
+          Tambah Buku
+        </button>
+      </div>
+    </form>
+
+    <div class="flex items-center justify-center py-3">
+      <label class="input input-bordered input-accent flex items-center gap-2">
+        <!-- <input type="text" class="grow" placeholder="Search" /> -->
+        <input
+          type="text"
+          id="search"
+          placeholder="Cari Buku..."
+          class="w-full grow max-w-xs"
+        />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 16 16"
+          fill="currentColor"
+          class="w-4 h-4 opacity-70"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M9.965 11.026a5 5 0 1 1 1.06-1.06l2.755 2.754a.75.75 0 1 1-1.06 1.06l-2.755-2.754ZM10.5 7a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z"
+            clip-rule="evenodd"
+          />
+        </svg>
+      </label>
+    </div>
+
+    <div id="bookshelves" class="flex justify-around">
+      <div
+        id="unfinished-bookshelf"
+        class="w-1/2 p-4 bg-white shadow-md rounded mr-4 rounded-md border-2 border-accent overflow-hidden font-[sans-serif]"
+      >
+        <h2 class="text-2xl font-semibold mb-4 text-center uppercase mt-6">
+          Belum Selesai Dibaca
+        </h2>
+        <ul id="unfinished-list" class="list-none p-0"></ul>
+      </div>
+      <div
+        id="finished-bookshelf"
+        class="w-1/2 p-4 shadow-md rounded rounded-md border-2 border-accent overflow-hidden font-[sans-serif]"
+      >
+        <h2 class="text-2xl font-semibold mb-4 text-center uppercase mt-6">
+          Selesai Dibaca
+        </h2>
+        <ul id="finished-list" class="list-none p-0"></ul>
+      </div>
+    </div>
+    <dialog id="modal_delete" class="modal">
+      <div class="modal-box">
+        <div class="my-8 text-center">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="w-16 fill-red-500 inline"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M19 7a1 1 0 0 0-1 1v11.191A1.92 1.92 0 0 1 15.99 21H8.01A1.92 1.92 0 0 1 6 19.191V8a1 1 0 0 0-2 0v11.191A3.918 3.918 0 0 0 8.01 23h7.98A3.918 3.918 0 0 0 20 19.191V8a1 1 0 0 0-1-1Zm1-3h-4V2a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v2H4a1 1 0 0 0 0 2h16a1 1 0 0 0 0-2ZM10 4V3h4v1Z"
+              data-original="#000000"
+            />
+            <path
+              d="M11 17v-7a1 1 0 0 0-2 0v7a1 1 0 0 0 2 0Zm4 0v-7a1 1 0 0 0-2 0v7a1 1 0 0 0 2 0Z"
+              data-original="#000000"
+            />
+          </svg>
+          <h4 class="text-lg font-semibold mt-6">
+            Apakah anda yakin akan menghapus data ?
+          </h4>
+          <h5 id="book-info" class="text-md mt-6 font-bold"></h5>
+        </div>
+
+        <div
+          class="modal-action flex flex-row justify-center items-center text-center"
+        >
+          <form method="dialog">
+            <!-- if there is a button in form, it will close the modal -->
+            <button class="btn btn-outline btn-info">Batal</button>
+            <button
+              id="confirm-delete"
+              type="button"
+              class="btn btn-outline btn-error"
+            >
+              Hapus
+            </button>
+          </form>
+        </div>
+      </div>
+    </dialog>
+    <dialog id="modal_edit" class="modal">
+      <div class="modal-box">
+        <div class="my-8 text-center">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="w-16 fill-blue-500 inline"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M12 2a10 10 0 0 0-10 10 10 10 0 0 0 10 10 10 10 0 0 0 10-10A10 10 0 0 0 12 2Zm0 18a8 8 0 1 1 8-8 8.01 8.01 0 0 1-8 8Zm1-7v3a1 1 0 0 1-2 0v-3H8a1 1 0 1 1 0-2h3V8a1 1 0 0 1 2 0v3h3a1 1 0 0 1 0 2h-3Z"
+              data-original="#000000"
+            />
+          </svg>
+          <h4 class="text-lg font-semibold mt-6">Edit Book</h4>
+        </div>
+
+        <form id="edit-form">
+          <div class="form-control mb-4">
+            <label class="label">
+              <span class="label-text">Title</span>
+            </label>
+            <input
+              type="text"
+              id="edit-title"
+              class="input input-bordered"
+              required
+            />
+          </div>
+
+          <div class="form-control mb-4">
+            <label class="label">
+              <span class="label-text">Author</span>
+            </label>
+            <input
+              type="text"
+              id="edit-author"
+              class="input input-bordered"
+              required
+            />
+          </div>
+
+          <div class="form-control mb-4">
+            <label class="label">
+              <span class="label-text">Year</span>
+            </label>
+            <input
+              type="number"
+              id="edit-year"
+              class="input input-bordered"
+              required
+            />
+          </div>
+
+          <div
+            class="modal-action flex flex-row justify-center items-center text-center"
+          >
+            <button
+              type="button"
+              class="btn btn-outline btn-info"
+              onclick="document.getElementById('modal_edit').close()"
+            >
+              Batal
+            </button>
+            <button
+              id="confirm-edit"
+              type="submit"
+              class="btn btn-outline btn-success"
+            >
+              Simpan
+            </button>
+          </div>
+        </form>
+      </div>
+    </dialog>
+    <script src="js/main.js"></script>
+  </body>
+</html>
